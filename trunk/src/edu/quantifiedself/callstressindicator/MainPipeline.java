@@ -19,7 +19,7 @@
  * You should have received a copy of the GNU Lesser General Public 
  * License along with Funf. If not, see <http://www.gnu.org/licenses/>.
  */
-package edu.mit.media.funf.wifiscanner;
+package edu.quantifiedself.callstressindicator;
 
 import static edu.mit.media.funf.AsyncSharedPrefs.async;
 

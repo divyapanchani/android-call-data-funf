@@ -1,4 +1,4 @@
-package edu.mit.media.funf.wifiscanner;
+package edu.quantifiedself.callstressindicator;
 
 import java.util.ArrayList;
 import java.util.Date;

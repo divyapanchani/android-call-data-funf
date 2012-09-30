@@ -1,4 +1,4 @@
-package edu.mit.media.funf.wifiscanner;
+package edu.quantifiedself.callstressindicator;
 
 import android.app.Activity;
 import android.content.Context;
@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import edu.mit.media.funf.probe.builtin.LocationProbe;
 import edu.mit.media.funf.probe.builtin.WifiProbe;
+import edu.mit.media.funf.wifiscanner.R;
 
 public class MainActivity extends Activity implements OnSharedPreferenceChangeListener {
 
