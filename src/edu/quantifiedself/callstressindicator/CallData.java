@@ -1,4 +1,4 @@
-package edu.mit.media.funf.wifiscanner;
+package edu.quantifiedself.callstressindicator;
 
 public class CallData {
 	
