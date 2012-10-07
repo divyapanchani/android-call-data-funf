@@ -22,5 +22,20 @@
  -->
 
 <resources>
-    <string name="app_name">Wifi Scanner</string>
+    <string name="app_name">Call Stress Indicator</string>
+    <string name="date_period_prompt">Select period</string>
+	<string-array name="date_periods_array">
+		<item>Last week</item>
+		<item>Last month</item>
+		<item>custom</item>
+	</string-array>
+    <string name="chart_unit_prompt">Select unit</string>
+	<string-array name="chart_units_array">
+		<item>Per call</item>
+		<item>Per day</item>
+		<item>Per month</item>
+	</string-array>
+    <string name="generate_chart_prompt">Update</string>
+    <string name="chart_title">Stress overview</string>
+    	
 </resources>

@@ -29,10 +29,10 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import edu.mit.media.funf.probe.Probe;
 
-public class WifiProbe extends Probe{
+public class CustomCallProbe extends Probe{
 
         public static final long DEFAULT_PERIOD = 60L * 5L;
-        private static final String TAG = WifiProbe.class.getName();
+        private static final String TAG = CustomCallProbe.class.getName();
        
         private TelephonyManager mTelephonyManager;
         private PhoneStateListener mPhoneStateListener ;
