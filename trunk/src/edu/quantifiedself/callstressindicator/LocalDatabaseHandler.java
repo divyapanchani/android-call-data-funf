@@ -18,6 +18,7 @@ public class LocalDatabaseHandler extends SQLiteOpenHelper{
 	private static final int DATABASE_VERSION  = 1;
 	private static final String DATABASE_NAME = "call_analyzer_data";
 	private static final String TABLE_DATA = "call_data";
+	private static final String TABLE_SETTINGS = "settings";
 	
 	// columns name
 	private static final String ID = "id";
@@ -26,6 +27,11 @@ public class LocalDatabaseHandler extends SQLiteOpenHelper{
 	private static final String DURATION = "duration";
 	private static final String TIMESTAMP = "timestamp";
 	private static final String ACCEL = "accel";
+	// for settings table
+	private static final String SET_ID = "id";
+	private static final String AVG = "avg";
+	private static final String MAX = "max";
+	private static final String MIN = "min";
 
 	public LocalDatabaseHandler(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -42,15 +48,63 @@ public class LocalDatabaseHandler extends SQLiteOpenHelper{
                 + ACCEL + " REAL"
                 + ")";
 		db.execSQL(CREATE_DATA_TABLE);
+		String CREATE_SETTINGS_TABLE = "CREATE TABLE " + TABLE_SETTINGS + "("
+                + SET_ID + " INTEGER PRIMARY KEY," 
+				+ MIN + " REAL,"
+                + MAX + " REAL,"
+                + AVG + " REAL"
+                + ")";
+		db.execSQL(CREATE_SETTINGS_TABLE);
 	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		// Drop older table if existed
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_DATA);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_SETTINGS);
         // Create tables again
         onCreate(db);
 	}
+	
+	// SETTINGS TABLE
+	public void addSetting(CallSettings settings) {
+		SQLiteDatabase db = this.getWritableDatabase();
+		ContentValues values = new ContentValues();
+		values.put(MIN, settings.getMin());
+	    values.put(MAX, settings.getMax());
+	    values.put(AVG, settings.getAvg());
+	    // Inserting Row
+	    db.insert(TABLE_DATA, null, values);
+	    db.close(); // Closing database connection
+	}
+	
+	public CallSettings getSettings(){
+	    String whereExpr = " LIMIT 1";
+	    String selectQuery = "SELECT * FROM " + TABLE_DATA + whereExpr;
+	    SQLiteDatabase db = this.getWritableDatabase();
+	    Cursor cursor = db.rawQuery(selectQuery, null);
+	    CallSettings settings = null;
+	    if (cursor.moveToFirst()) {
+	    	settings = new CallSettings();
+        	settings.setMin(cursor.getDouble(1));
+        	settings.setMax(cursor.getDouble(2));
+        	settings.setAvg(cursor.getDouble(3));
+
+	    }
+	    cursor.close();
+	    return settings;		
+	}
+	
+	public int updateCallSettings(double min, double max, double avg) {
+		String sql = "UPDATE " + TABLE_SETTINGS + " SET max = " + max +", min = " + min + 
+				", avg = " + avg;
+		SQLiteDatabase db = this.getWritableDatabase();
+		Cursor cursor = db.rawQuery(sql, null);
+		cursor.close();
+		return 0;
+	}
+	
+	// END SETTINGS TABLE
 	
 	public void addCallData(CallData callData) {
 		SQLiteDatabase db = this.getWritableDatabase();
