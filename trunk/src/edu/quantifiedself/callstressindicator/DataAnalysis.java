@@ -14,8 +14,13 @@ public class DataAnalysis {
 
 	public static ArrayList<Double> overThreshold(double [] data, double threshold){
 		ArrayList<Double> a = new ArrayList<Double>();
+		int cons = 0;
 		for(int i=0;i<data.length;i++){
 			if(data[i] > threshold)
+				cons++;
+			else
+				cons = 0;
+			if(cons == 3)
 				a.add(data[i]);
 		}
 		return a;
