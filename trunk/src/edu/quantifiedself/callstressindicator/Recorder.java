@@ -45,13 +45,7 @@ public class Recorder {
                 this.TAG = tag;
         }
        
-        public double rms(double[] nums){
-            double ms = 0;
-            for (int i = 0; i < nums.length; i++)
-                ms += nums[i] * nums[i];
-            ms /= nums.length;
-            return Math.sqrt(ms);
-        }
+
 
         public void record(String incomingNumber){
         		this.incomingNumber = incomingNumber;
@@ -73,16 +67,34 @@ public class Recorder {
         	double [] data_array = new double[data.size()];
         	for(int pos=0;pos < data.size();pos++)
         		data_array[pos] = data.get(pos);
-        	// find min rms, max rms, avg rms
-        	double [] minMaxAvg = DataAnalysis.minMaxAvg(data_array);
         	// gets all rms values that are over avg
-        	ArrayList<Double> overAvg = DataAnalysis.overThreshold(data_array, minMaxAvg[2]);
         	b.putDoubleArray("MALAKIES", data_array);
         	i.putExtras(b);
         	context.startService(i);
         	Log.i(TAG, "O FIAS");
         }
         
+        private void setScore(double [] data){
+        	double min, max, avg;
+        	double [] holder = DataAnalysis.minMaxAvg(data);
+        	min = 0.0; // TODO min, max, avg load from settings
+        	max = 0.0;
+        	avg = 0.0;
+        	if(min == 0.0 || avg == 0.0 || max == 0.0){
+        		//calculate from the current data
+        		min = holder[0];
+        		max = holder[1];
+        		avg = holder[2];
+        	}
+        	else{
+        		min = DataAnalysis.updateValues(holder[0], min);
+        		max = DataAnalysis.updateValues(holder[1], max);
+        		avg = DataAnalysis.updateValues(holder[2], max);
+        	}
+        	// TODO save to settings min, max, avg
+        	int score = DataAnalysis.getScaledScore(data, min, max, avg);
+        	// TODO save score to db
+        }
         
         private class RecordAudio extends AsyncTask<Void, Integer, Void>{
                
@@ -104,7 +116,7 @@ public class Recorder {
                             for(int i = 0; i < blocksize && i < bufferReaderResult; i ++){
                                     toTransform[i] = (double) buffer[i] / 32678.0; // signed 16 bit
                             }
-                            data.add(rms(toTransform));
+                            data.add(DataAnalysis.rms(toTransform));
                     }
                     audioRecord.stop();
                     writeToFunf(data);
