@@ -109,16 +109,17 @@ public class Recorder {
         		settings.setAvg(newValues[2]);
         		settings.setMin(newValues[0]);
         		settings.setMax(newValues[1]);
-        		min = settings.getMin();
-        		max = settings.getMax();
-        		avg = settings.getAvg();
+        		db.addSetting(settings);
         	}
-        	else{
-        		min = DataAnalysis.updateValues(newValues[0], settings.getMin());
-        		max = DataAnalysis.updateValues(newValues[1], settings.getMax());
-        		avg = DataAnalysis.updateValues(newValues[2], settings.getAvg());
-        		db.updateCallSettings(min, max, avg);
-        	}
+    		min = settings.getMin();
+    		max = settings.getMax();
+    		avg = settings.getAvg();
+//        	else{
+//        		min = DataAnalysis.updateValues(newValues[0], settings.getMin());
+//        		max = DataAnalysis.updateValues(newValues[1], settings.getMax());
+//        		avg = DataAnalysis.updateValues(newValues[2], settings.getAvg());
+//        		db.updateCallSettings(min, max, avg);
+//        	}
         	Log.i(TAG, "Min:" + min +  " Max:" + max + " Avg:" + avg);
         	float score = DataAnalysis.getScaledScore(data, min, max, avg);
         	Log.i(TAG, "Score:" +score);
