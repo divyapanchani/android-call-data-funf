@@ -14,6 +14,7 @@ import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.ContactsContract.Contacts.Data;
 import android.sax.StartElementListener;
 import android.util.Log;
 
@@ -66,6 +67,7 @@ public class Recorder {
         	}
         	return (float)(sum / rmsValues.size());
         }
+        
         public void record(String phone){
         		this.phone = phone;
         		this.callStart = System.currentTimeMillis();
@@ -95,12 +97,31 @@ public class Recorder {
 
 		public void writeLocally(ArrayList<Double> data) {
 	        LocalDatabaseHandler db = new LocalDatabaseHandler(context);
+	        SettingsDatabaseHandler settingsDb = new SettingsDatabaseHandler(context);
         	CallData callData = new CallData();
         	callData.setPhone(phone);
         	callData.setTimestamp(new Date(callStart));
         	callData.setDuration((int)(callEnd - callStart));
-        	callData.setRmsMedion(normalizeRms(data));
-
+        	CallSettings settings = settingsDb.getSettings();
+        	double [] newValues = DataAnalysis.minMaxAvg(data);
+        	double min, max, avg;
+        	if(settings == null){
+        		settings = new CallSettings();
+        		settings.setAvg(newValues[2]);
+        		settings.setMin(newValues[0]);
+        		settings.setMax(newValues[1]);
+        		min = settings.getMin();
+        		max = settings.getMax();
+        		avg = settings.getAvg();
+        	}
+        	else{
+        		min = DataAnalysis.updateValues(newValues[0], settings.getMin());
+        		max = DataAnalysis.updateValues(newValues[1], settings.getMax());
+        		avg = DataAnalysis.updateValues(newValues[2], settings.getAvg());
+        		settingsDb.updateCallData(min, max, avg);
+        	}
+        	float score = DataAnalysis.getScaledScore(data, min, max, avg);
+        	callData.setRmsMedion(score);
 	        Log.d("Insert: ", "Inserting ..");	        
 	        db.addCallData(callData);
 	        
@@ -112,11 +133,6 @@ public class Recorder {
 	        db.close();
 		}
 		
-        private double aggregateCallData(ArrayList<Double> data){
-        	
-        	return 1.0;
-        }
-        
         private class RecordAudio extends AsyncTask<Void, Integer, Void>{
                
             @Override
