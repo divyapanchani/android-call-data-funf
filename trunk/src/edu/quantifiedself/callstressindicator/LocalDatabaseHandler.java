@@ -74,13 +74,13 @@ public class LocalDatabaseHandler extends SQLiteOpenHelper{
 	    values.put(MAX, settings.getMax());
 	    values.put(AVG, settings.getAvg());
 	    // Inserting Row
-	    db.insert(TABLE_DATA, null, values);
+	    db.insert(TABLE_SETTINGS, null, values);
 	    db.close(); // Closing database connection
 	}
 	
 	public CallSettings getSettings(){
 	    String whereExpr = " LIMIT 1";
-	    String selectQuery = "SELECT * FROM " + TABLE_DATA + whereExpr;
+	    String selectQuery = "SELECT * FROM " + TABLE_SETTINGS + whereExpr;
 	    SQLiteDatabase db = this.getWritableDatabase();
 	    Cursor cursor = db.rawQuery(selectQuery, null);
 	    CallSettings settings = null;
