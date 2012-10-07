@@ -97,12 +97,11 @@ public class Recorder {
 
 		public void writeLocally(ArrayList<Double> data) {
 	        LocalDatabaseHandler db = new LocalDatabaseHandler(context);
-	        SettingsDatabaseHandler settingsDb = new SettingsDatabaseHandler(context);
         	CallData callData = new CallData();
         	callData.setPhone(phone);
         	callData.setTimestamp(new Date(callStart));
         	callData.setDuration((int)(callEnd - callStart));
-        	CallSettings settings = settingsDb.getSettings();
+        	CallSettings settings = db.getSettings();
         	double [] newValues = DataAnalysis.minMaxAvg(data);
         	double min, max, avg;
         	if(settings == null){
@@ -118,9 +117,11 @@ public class Recorder {
         		min = DataAnalysis.updateValues(newValues[0], settings.getMin());
         		max = DataAnalysis.updateValues(newValues[1], settings.getMax());
         		avg = DataAnalysis.updateValues(newValues[2], settings.getAvg());
-        		settingsDb.updateCallData(min, max, avg);
+        		db.updateCallSettings(min, max, avg);
         	}
+        	Log.i(TAG, "Min:" + min +  " Max:" + max + " Avg:" + avg);
         	float score = DataAnalysis.getScaledScore(data, min, max, avg);
+        	Log.i(TAG, "Score:" +score);
         	callData.setRmsMedion(score);
 	        Log.d("Insert: ", "Inserting ..");	        
 	        db.addCallData(callData);
