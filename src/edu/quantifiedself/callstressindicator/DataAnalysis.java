@@ -16,16 +16,37 @@ public class DataAnalysis {
 		return (0.6*oldValue + 0.4*newValue);
 	}
 	
-	/*
-	 * returns the loudness score for the call between 1 - 10
-	 */
+//	/*
+//	 * returns the loudness score for the call between 1 - 10
+//	 */
+//	public static float getScaledScore(ArrayList<Double> data, double min, double max, double avg){
+//		int N = data.size();
+//		double total_score = 0;
+//		for(int i=0;i<N;i++){
+//			total_score += getScore(data.get(i), min, avg, max);
+//		}
+//		return (float)((10 * total_score)/N);
+//	}
+	
 	public static float getScaledScore(ArrayList<Double> data, double min, double max, double avg){
 		int N = data.size();
-		double total_score = 0;
+		// find scores
+		double scores [] = new double[N];
+		for(int i=0;i<N;i++)
+			scores[i] = getScore(data.get(i), min, avg, max);
+		//find max score
+		double max_score = -1.0;
 		for(int i=0;i<N;i++){
-			total_score += getScore(data.get(i), min, avg, max);
+			if(scores[i] > max_score)
+				max_score = scores[i];
 		}
-		return (float)((10 * total_score)/N);
+		// normalize
+		double sum = 0.0;
+		for(int i=0;i<N;i++){
+			scores[i] = (double)scores[i]/max;
+			sum = sum + scores[i];
+		}
+		return (float) (sum / N) * 10;
 	}
 	
 	/*
