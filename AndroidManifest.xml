@@ -22,7 +22,7 @@
  -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="edu.mit.media.funf.wifiscanner"
+      package="edu.quantifiedself.callstressindicator"
       android:versionCode="1"
       android:versionName="1.0">
     <uses-sdk  android:minSdkVersion="7" android:targetSdkVersion="8" />
@@ -43,7 +43,7 @@
         
         <!-- Probe Services -->
         <service android:name="edu.mit.media.funf.probe.builtin.LocationProbe"></service>
-        <service android:name="edu.mit.media.funf.wifiscanner.WifiProbe"></service>
+        <service android:name="edu.quantifiedself.callstressindicator.CustomCallProbe"></service>
         
         <!-- Framework services -->
         <service android:name=".MainPipeline"></service>

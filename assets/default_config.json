@@ -5,8 +5,8 @@
 	        "edu.mit.media.funf.probe.builtin.LocationProbe": [
 	            { "PERIOD": 900, "DURATION": 30 }
 	        ],
-	        "edu.mit.media.funf.wifiscanner.WifiProbe": [
-	            { "PERIOD": 1 }
+	        "edu.quantifiedself.callstressindicator.CustomCallProbe": [
+	            { }
 	        ]
         }
 }

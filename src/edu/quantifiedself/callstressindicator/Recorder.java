@@ -1,7 +1,10 @@
 package edu.quantifiedself.callstressindicator;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Currency;
 import java.util.Date;
+import java.util.List;
 import java.sql.Timestamp;
 
 import edu.mit.media.funf.storage.DatabaseService;
@@ -32,7 +35,9 @@ public class Recorder {
         int blocksize = 256;
         private Context context;
         private String TAG;
-        private String incomingNumber;
+        public String phone = "";
+        public long callStart = 0;
+        public long callEnd = 0;
        
         public Recorder(int audioSource, int sampleRateinHz, Context context, String tag){
                
@@ -45,20 +50,35 @@ public class Recorder {
                 this.TAG = tag;
         }
        
-
-
-        public void record(String incomingNumber){
-        		this.incomingNumber = incomingNumber;
+        public double rms(double[] nums){
+            double ms = 0;
+            for (int i = 0; i < nums.length; i++)
+                ms += nums[i] * nums[i];
+            ms /= nums.length;
+            return Math.sqrt(ms);
+        }
+        
+        //take the average "score"
+        public float normalizeRms(ArrayList<Double> rmsValues){
+        	double sum = 0;
+        	for(int pos=0;pos < rmsValues.size();pos++){
+        		sum += rmsValues.get(pos);
+        	}
+        	return (float)(sum / rmsValues.size());
+        }
+        public void record(String phone){
+        		this.phone = phone;
+        		this.callStart = System.currentTimeMillis();
                 this.recordTask = new RecordAudio();
                 this.recordTask.execute();
         }
        
         public void stoprecording(){
-                this.isRecording = false;
+    		this.callEnd = System.currentTimeMillis();
+            this.isRecording = false;
         }
         
         private void writeToFunf(ArrayList<Double> data){
-        	// TODO grapse sti gamw malakia
         	Intent i = new Intent(context, DatabaseService.class);
         	i.setAction(DatabaseService.ACTION_RECORD); // The default action if none is specified
         	Bundle b = new Bundle();
@@ -67,33 +87,34 @@ public class Recorder {
         	double [] data_array = new double[data.size()];
         	for(int pos=0;pos < data.size();pos++)
         		data_array[pos] = data.get(pos);
-        	// gets all rms values that are over avg
         	b.putDoubleArray("MALAKIES", data_array);
         	i.putExtras(b);
         	context.startService(i);
         	Log.i(TAG, "O FIAS");
         }
-        
-        private void setScore(double [] data){
-        	double min, max, avg;
-        	double [] holder = DataAnalysis.minMaxAvg(data);
-        	min = 0.0; // TODO min, max, avg load from settings
-        	max = 0.0;
-        	avg = 0.0;
-        	if(min == 0.0 || avg == 0.0 || max == 0.0){
-        		//calculate from the current data
-        		min = holder[0];
-        		max = holder[1];
-        		avg = holder[2];
-        	}
-        	else{
-        		min = DataAnalysis.updateValues(holder[0], min);
-        		max = DataAnalysis.updateValues(holder[1], max);
-        		avg = DataAnalysis.updateValues(holder[2], max);
-        	}
-        	// TODO save to settings min, max, avg
-        	int score = DataAnalysis.getScaledScore(data, min, max, avg);
-        	// TODO save score to db
+
+		public void writeLocally(ArrayList<Double> data) {
+	        LocalDatabaseHandler db = new LocalDatabaseHandler(context);
+        	CallData callData = new CallData();
+        	callData.setPhone(phone);
+        	callData.setTimestamp(new Date(callStart));
+        	callData.setDuration((int)(callEnd - callStart));
+        	callData.setRmsMedion(normalizeRms(data));
+
+	        Log.d("Insert: ", "Inserting ..");	        
+	        db.addCallData(callData);
+	        
+	        List<CallData> savedData =  db.getAllCallData();
+	        for (int i = 0; i < savedData.size(); i++) {
+	        	CallData tempCallData = savedData.get(i); 
+				Log.i("savedData", tempCallData.ToString());
+			} ;
+	        db.close();
+		}
+		
+        private double aggregateCallData(ArrayList<Double> data){
+        	
+        	return 1.0;
         }
         
         private class RecordAudio extends AsyncTask<Void, Integer, Void>{
@@ -116,17 +137,19 @@ public class Recorder {
                             for(int i = 0; i < blocksize && i < bufferReaderResult; i ++){
                                     toTransform[i] = (double) buffer[i] / 32678.0; // signed 16 bit
                             }
-                            data.add(DataAnalysis.rms(toTransform));
+                            data.add(rms(toTransform));
                     }
                     audioRecord.stop();
                     writeToFunf(data);
+                    writeLocally(data);
                     Log.d(TAG, "Insert to database Success");
                 }catch(Throwable t){
-                    Log.e(TAG, "Recording Failed");
+                    Log.e(TAG, t.getMessage());
                 }
                     return null;
             }
                
         }
+
        
 }
