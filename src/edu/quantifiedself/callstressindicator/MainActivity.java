@@ -3,8 +3,10 @@ package edu.quantifiedself.callstressindicator;
 import java.text.DecimalFormat;
 import java.text.FieldPosition;
 import java.text.Format;
+import java.text.ParseException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -77,6 +79,8 @@ public class MainActivity extends Activity {
 		
 		// default is one week
 		setPeriodLastWeek();
+		//default
+		ChartUnit = "Per call";
 		 // Initialize chart  
 		createChart(FromDate, ToDate, ChartUnit );
         
@@ -162,27 +166,35 @@ public class MainActivity extends Activity {
 		// initialize our XYPlot reference:
         mySimpleXYPlot = (XYPlot) findViewById(R.id.startXYPlot);
         // Get data
-        Number[] stressValues = {5, 8, 9, 2, 5};
-        Number[] timeValues = {
-                978307200,  // 2001
-                1009843200, // 2002
-                1041379200, // 2003
-                1072915200, // 2004
-                1104537600  // 2005
-        };
+        List<Float> stressValues = new ArrayList<Float>();	//{5, 8, 9, 2, 5};
+        List<Long> timeValues = new ArrayList<Long>();
+//        	{
+//                978307200,  // 2001
+//                1009843200, // 2002
+//                1041379200, // 2003
+//                1072915200, // 2004
+//                1104537600  // 2005
+//        };
         LocalDatabaseHandler db = new LocalDatabaseHandler(this);
         String dataToPrint = "";
         List<CallData> periodData =  db.getCallDataInPeriod(FromDate, ToDate);
         for (int i = 0; i < periodData.size(); i++) {
         	CallData tempCallData = periodData.get(i); 
         	dataToPrint += tempCallData.ToString();
-        	switch (Enums.ChartUnits.valueOf(Enums.ChartUnits, unit)) {
-			case Enums.ChartUnits.Per_day:
+        	if (unit == "Per call") {
+				stressValues.add(new Float(tempCallData.getRmsMedion()));
+				try {
+					timeValues.add(new Long(dateFormat.parse(tempCallData.getTimestamp()).getTime()));
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			} else if (unit == "Per day") {
 				
-				break;
+			} else if (unit == "Per month") {
+				
+			} else {
 
-			default:
-				break;
 			}
         	
 		} ;
@@ -191,8 +203,8 @@ public class MainActivity extends Activity {
         
         // create our series from our array of nums:
         XYSeries series2 = new SimpleXYSeries(
-                Arrays.asList(stressValues),
-                Arrays.asList(timeValues),
+                stressValues,
+                timeValues,
                 unit);
  
         mySimpleXYPlot.getGraphWidget().getGridBackgroundPaint().setColor(Color.WHITE);
@@ -224,7 +236,7 @@ public class MainActivity extends Activity {
         mySimpleXYPlot.addSeries(series2, formatter);
  
         // draw a domain tick for each year:
-        mySimpleXYPlot.setDomainStep(XYStepMode.SUBDIVIDE, years.length);
+        mySimpleXYPlot.setDomainStep(XYStepMode.SUBDIVIDE, timeValues.size());
  
         // customize our domain/range labels
         mySimpleXYPlot.setDomainLabel("Year");
@@ -238,7 +250,7 @@ public class MainActivity extends Activity {
             // create a simple date format that draws on the year portion of our timestamp.
             // see http://download.oracle.com/javase/1.4.2/docs/api/java/text/SimpleDateFormat.html
             // for a full description of SimpleDateFormat.
-            private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy");
+            private SimpleDateFormat dateFormat = new SimpleDateFormat("dd");
  
             @Override
             public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
