@@ -82,7 +82,7 @@ public class MainActivity extends Activity {
 		//default
 		ChartUnit = "Per call";
 		 // Initialize chart  
-		createChart(FromDate, ToDate, ChartUnit );
+//		createChart(FromDate, ToDate, ChartUnit );
         
         
 		Calendar c = Calendar.getInstance();
