@@ -36,7 +36,7 @@ public class TelephonyListener extends PhoneStateListener{
                 break;
         case TelephonyManager.CALL_STATE_RINGING:
         		Log.i(TAG, "RINGING " + incomingNumber);
-        		startRecording();
+        		startRecording(incomingNumber);
                 break;
         case TelephonyManager.CALL_STATE_IDLE:
         	stopRecording();
@@ -50,8 +50,8 @@ public class TelephonyListener extends PhoneStateListener{
     	myAudioRecorder.stoprecording();
 	}
 
-	private void startRecording(){
-		myAudioRecorder.record();
+	private void startRecording(String incomingNumber){
+		myAudioRecorder.record(String incomingNumber);
     }
 
 }
