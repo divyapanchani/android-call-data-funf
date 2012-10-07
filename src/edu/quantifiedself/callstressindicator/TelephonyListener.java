@@ -51,7 +51,7 @@ public class TelephonyListener extends PhoneStateListener{
 	}
 
 	private void startRecording(String incomingNumber){
-		myAudioRecorder.record(String incomingNumber);
+		myAudioRecorder.record(incomingNumber);
     }
 
 }

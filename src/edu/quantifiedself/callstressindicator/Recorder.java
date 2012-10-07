@@ -54,7 +54,7 @@ public class Recorder {
         }
 
         public void record(String incomingNumber){
-        		this.incomingNumber = incomingNumber
+        		this.incomingNumber = incomingNumber;
                 this.recordTask = new RecordAudio();
                 this.recordTask.execute();
         }
@@ -73,20 +73,16 @@ public class Recorder {
         	double [] data_array = new double[data.size()];
         	for(int pos=0;pos < data.size();pos++)
         		data_array[pos] = data.get(pos);
+        	// find min rms, max rms, avg rms
+        	double [] minMaxAvg = DataAnalysis.minMaxAvg(data_array);
+        	// gets all rms values that are over avg
+        	ArrayList<Double> overAvg = DataAnalysis.overThreshold(data_array, minMaxAvg[2]);
         	b.putDoubleArray("MALAKIES", data_array);
         	i.putExtras(b);
         	context.startService(i);
         	Log.i(TAG, "O FIAS");
         }
         
-        private double aggregateCallData(ArrayList<Double> data){
-        	double [] data_array = new double[data.size()];
-        	for(int pos=0;pos < data.size();pos++)
-        		data_array[pos] = data.get(pos);
-        	double [] minMaxAvg = DataAnalysis.minMaxAvg(data_array);
-        	
-        	return 1.0;
-        }
         
         private class RecordAudio extends AsyncTask<Void, Integer, Void>{
                
