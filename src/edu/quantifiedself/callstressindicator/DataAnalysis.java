@@ -11,6 +11,16 @@ public class DataAnalysis {
 		sum = sum + data[size];
 	return sum / size;
 	}
+	
+	public static int getScore(double [] data, double threshold){
+		int N = data.length;
+		int over = 0;
+		for(int i=0;i<N;i++){
+			if(data[i] > threshold)
+				over++;
+		}
+		return (10 * over) / N;
+	}
 
 	public static ArrayList<Double> overThreshold(double [] data, double threshold){
 		ArrayList<Double> a = new ArrayList<Double>();
