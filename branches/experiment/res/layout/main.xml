@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <DatePicker
+            android:id="@+id/fromDatePicker"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
+
+        <DatePicker
+            android:id="@+id/toDatePicker"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/queryTest"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Query test" />
+
+    <Button
+        android:id="@+id/queryAllBtn"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Query all" />
+
+    <ScrollView
+        android:id="@+id/scroll"
+        android:layout_width="300dp"
+        android:layout_height="fill_parent" >
+
+        <TextView
+            android:id="@+id/chartData"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:text="None" />
+    </ScrollView>
+
+</LinearLayout>
