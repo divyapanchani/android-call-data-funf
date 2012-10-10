@@ -48,6 +48,7 @@ public class LocalDatabaseHandler extends SQLiteOpenHelper{
                 + ACCEL + " REAL"
                 + ")";
 		db.execSQL(CREATE_DATA_TABLE);
+//		fillDb();
 		String CREATE_SETTINGS_TABLE = "CREATE TABLE " + TABLE_SETTINGS + "("
                 + SET_ID + " INTEGER PRIMARY KEY," 
 				+ MIN + " REAL,"
@@ -92,6 +93,7 @@ public class LocalDatabaseHandler extends SQLiteOpenHelper{
 
 	    }
 	    cursor.close();
+	    db.close();
 	    return settings;		
 	}
 	
@@ -101,6 +103,7 @@ public class LocalDatabaseHandler extends SQLiteOpenHelper{
 		SQLiteDatabase db = this.getWritableDatabase();
 		Cursor cursor = db.rawQuery(sql, null);
 		cursor.close();
+		db.close();
 		return 0;
 	}
 	
@@ -119,11 +122,15 @@ public class LocalDatabaseHandler extends SQLiteOpenHelper{
 	    db.close(); // Closing database connection
 	}
 
-	public List<CallData> getCallData(String whereClause){
+	public List<CallData> getCallData(String selectClause, String whereClause, String groupByClause){
+		if (selectClause == "") {
+			selectClause = "SELECT * ";
+		}
 	    List<CallData> callDataList = new ArrayList<CallData>();
 	    // Select All Query
 	    String whereExpr = whereClause == "" ? "" : " WHERE " + whereClause;
-	    String selectQuery = "SELECT * FROM " + TABLE_DATA + whereExpr;
+	    
+	    String selectQuery = selectClause + " FROM " + TABLE_DATA + whereExpr + " " + groupByClause;
 	 
 	    SQLiteDatabase db = this.getWritableDatabase();
 	    Cursor cursor = db.rawQuery(selectQuery, null);
@@ -143,6 +150,8 @@ public class LocalDatabaseHandler extends SQLiteOpenHelper{
 	            callDataList.add(callData);
 	        } while (cursor.moveToNext());
 	    }
+	    cursor.close();
+	    db.close();
 	 
 	    // return contact list
 	    return callDataList;		
@@ -161,31 +170,45 @@ public class LocalDatabaseHandler extends SQLiteOpenHelper{
 	            tableSchema += "name: " + cursor.getString(1) + ", type: " + cursor.getString(2) + "\n";
 	        } while (cursor.moveToNext());
 	    }
-	 
+	    cursor.close();
+	    db.close();
 	    // return contact list
 	    return tableSchema;		
 	}
 	 
 	// Getting All CallDatas
 	public List<CallData> getAllCallData() {
-	    return getCallData("");
+	    return getCallData("","","");
   }
 	 
 	// Getting CallDatas in time period defined by start end (dates in unix epoch)
-	public List<CallData> getCallDataInPeriod(Date from, Date to ) {
-		from.setHours(0);
-		from.setMinutes(0);
-		from.setSeconds(0);
-		
-		to.setHours(23);
-		to.setMinutes(59);
-		to.setSeconds(59);
-		
-		String fromDate = MainActivity.dateFormat.format(from);
-		String toDate = MainActivity.dateFormat.format(to);
-	    return getCallData(TIMESTAMP + " between datetime('"+ fromDate +"') and datetime('" + toDate+"')");
+	public List<CallData> getCallDataInPeriod( Date from, Date to) {
+	    return getCallData("",getWherePeriodClause(from,to),"");
   }
-	 
+	// Getting CallDatas in time period defined by start end (dates in unix epoch)
+	public List<CallData> getPerPeriodCallDataInPeriod( String period,Date from, Date to) {
+//        + ID + " INTEGER PRIMARY KEY," 
+//		+ PHONE + " TEXT,"
+//        + TIMESTAMP + " DATE,"
+//        + DURATION + " INTEGER,"
+//        + RMS + " REAL,"
+//        + ACCEL + " REAL"
+        
+		String selectClause = "Select 0, ''," + TIMESTAMP+" ,0,AVG("+ RMS +"),0 ";
+		String periodSymbol = "";
+		if (period == "day") {
+			periodSymbol = "d";
+		} else if (period == "month") {
+			periodSymbol = "m";			
+		}
+		String groupByclause = "group by strftime('%" + periodSymbol + "'," + TIMESTAMP +")";
+	    return getCallData(selectClause, getWherePeriodClause(from,to), groupByclause);
+  }
+	// Getting CallDatas in time period defined by start end (dates in unix epoch)
+	public List<CallData> testQuery() {
+		String selectClause = "Select " + TIMESTAMP;
+	    return getCallData(selectClause,"", "");
+  }
 	// Getting CallDatas Count
 	public int getCallDataCount() {
 		return 0;
@@ -197,35 +220,49 @@ public class LocalDatabaseHandler extends SQLiteOpenHelper{
 	 
 	// Deleting single CallData
 	public void deleteCallData(CallData CallData) {}
+
+	private String getWherePeriodClause(Date from, Date to){
+		from.setHours(0);
+		from.setMinutes(0);
+		from.setSeconds(0);
+		
+		to.setHours(23);
+		to.setMinutes(59);
+		to.setSeconds(59);
+		
+		String fromDate = MainActivity.dateFormat.format(from);
+		String toDate = MainActivity.dateFormat.format(to);
+	    return TIMESTAMP + " between datetime('"+ fromDate +"') and datetime('" + toDate+"')";		
+	} 
 	
 	//insert training data in db
-//	public void fillDb(){
-//		addCallData(new CallData(5.65, 40000, 489894337, "+4915737119717", 3.44));
-//		addCallData(new CallData(5.65, 40000, 489894337, "+4915737119717", 3.44));
-//		addCallData(new CallData(5.65, 40000, 489894337, "+4915737119717", 3.44));
-//		addCallData(new CallData(5.65, 40000, 489894337, "+4915737119717", 3.44));
-//		addCallData(new CallData(5.65, 40000, 489894337, "+4915737119717", 3.44));
-//		addCallData(new CallData(5.65, 40000, 489894337, "+4915737119717", 3.44));
-//		addCallData(new CallData(5.65, 40000, 489894337, "+4915737119717", 3.44));
-//		addCallData(new CallData(5.65, 40000, 489894337, "+4915737119717", 3.44));
-//		addCallData(new CallData(5.65, 40000, 489894337, "+4915737119717", 3.44));
-//		addCallData(new CallData(5.65, 40000, 489894337, "+4915737119717", 3.44));
-//		addCallData(new CallData(5.65, 40000, 489894337, "+4915737119717", 3.44));
-//		addCallData(new CallData(5.65, 40000, 489894337, "+4915737119717", 3.44));
-//		addCallData(new CallData(5.65, 40000, 489894337, "+4915737119717", 3.44));
-//		addCallData(new CallData(5.65, 40000, 489894337, "+4915737119717", 3.44));
-//		addCallData(new CallData(5.65, 40000, 489894337, "+4915737119717", 3.44));
-//		addCallData(new CallData(5.65, 40000, 489894337, "+4915737119717", 3.44));
-//		addCallData(new CallData(5.65, 40000, 489894337, "+4915737119717", 3.44));
-//		addCallData(new CallData(5.65, 40000, 489894337, "+4915737119717", 3.44));
-//		addCallData(new CallData(5.65, 40000, 489894337, "+4915737119717", 3.44));
-//		addCallData(new CallData(5.65, 40000, 489894337, "+4915737119717", 3.44));
-//		addCallData(new CallData(5.65, 40000, 489894337, "+4915737119717", 3.44));
-//		addCallData(new CallData(5.65, 40000, 489894337, "+4915737119717", 3.44));
-//		addCallData(new CallData(5.65, 40000, 489894337, "+4915737119717", 3.44));
-//		addCallData(new CallData(5.65, 40000, 489894337, "+4915737119717", 3.44));
-//		addCallData(new CallData(5.65, 40000, 489894337, "+4915737119717", 3.44));
-//		addCallData(new CallData(5.65, 40000, 489894337, "+4915737119717", 3.44));
-//		
-//	}
+	public void fillDb(){
+		addCallData(new CallData(1.65, 40000, "2012-09-01 18:20:00", "+4915737119717", 3.44));
+		addCallData(new CallData(1.65, 40000, "2012-09-01 18:20:00", "+4915737119717", 3.44));
+		addCallData(new CallData(2.65, 40000, "2012-09-01 18:20:00", "+4915737119717", 3.44));
+		addCallData(new CallData(2.65, 40000, "2012-09-01 18:20:00", "+4915737119717", 3.44));
+		addCallData(new CallData(3.65, 40000, "2012-09-01 18:20:00", "+4915737119717", 3.44));
+		addCallData(new CallData(3.65, 40000, "2012-09-01 18:20:00", "+4915737119717", 3.44));
+		addCallData(new CallData(4.65, 40000, "2012-09-09 18:20:00", "+4915737119717", 3.44));
+		addCallData(new CallData(4.65, 40000, "2012-09-09 18:20:00", "+4915737119717", 3.44));
+		addCallData(new CallData(5.65, 40000, "2012-09-09 18:20:00", "+4915737119717", 3.44));
+		addCallData(new CallData(5.65, 40000, "2012-09-09 18:20:00", "+4915737119717", 3.44));
+		addCallData(new CallData(6.65, 40000, "2012-09-09 18:20:00", "+4915737119717", 3.44));
+		addCallData(new CallData(6.65, 40000, "2012-09-09 18:20:00", "+4915737119717", 3.44));
+		addCallData(new CallData(7.65, 40000, "2012-09-09 18:20:00", "+4915737119717", 3.44));
+		addCallData(new CallData(7.65, 40000, "2012-10-01 18:20:00", "+4915737119717", 3.44));
+		addCallData(new CallData(8.65, 40000, "2012-10-01 18:20:00", "+4915737119717", 3.44));
+		addCallData(new CallData(8.65, 40000, "2012-10-01 18:20:00", "+4915737119717", 3.44));
+		addCallData(new CallData(9.65, 40000, "2012-10-01 18:20:00", "+4915737119717", 3.44));
+		addCallData(new CallData(9.65, 40000, "2012-10-03 18:20:00", "+4915737119717", 3.44));
+		addCallData(new CallData(1.65, 40000, "2012-10-03 18:20:00", "+4915737119717", 3.44));
+		addCallData(new CallData(1.65, 40000, "2012-10-03 18:20:00", "+4915737119717", 3.44));
+		addCallData(new CallData(2.65, 40000, "2012-10-03 18:20:00", "+4915737119717", 3.44));
+		addCallData(new CallData(2.65, 40000, "2012-10-03 18:20:00", "+4915737119717", 3.44));
+		addCallData(new CallData(3.65, 40000, "2012-10-03 18:20:00", "+4915737119717", 3.44));
+		addCallData(new CallData(3.65, 40000, "2012-10-09 18:20:00", "+4915737119717", 3.44));
+		addCallData(new CallData(4.65, 40000, "2012-10-09 18:20:00", "+4915737119717", 3.44));
+		addCallData(new CallData(4.65, 40000, "2012-10-09 18:20:00", "+4915737119717", 3.44));
+		
+	}
 }
