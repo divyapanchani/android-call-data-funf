@@ -195,13 +195,14 @@ public class LocalDatabaseHandler extends SQLiteOpenHelper{
 //        + ACCEL + " REAL"
         
 		String selectClause = "Select 0, ''," + TIMESTAMP+" ,0,AVG("+ RMS +"),0 ";
-		String periodSymbol = "";
-		if (period == "day") {
-			periodSymbol = "d";
-		} else if (period == "month") {
+		String periodSymbol = "d";
+		// if (period == "Per day") {
+		// periodSymbol = "d";
+		// } else 
+		if (period.equals("Per month")) {
 			periodSymbol = "m";			
 		}
-		String groupByclause = "group by strftime('%" + periodSymbol + "'," + TIMESTAMP +")";
+		String groupByclause = "group by strftime('%" + periodSymbol + "'," + TIMESTAMP + ") " + " order by " + TIMESTAMP + " ASC";
 	    return getCallData(selectClause, getWherePeriodClause(from,to), groupByclause);
   }
 	// Getting CallDatas in time period defined by start end (dates in unix epoch)
