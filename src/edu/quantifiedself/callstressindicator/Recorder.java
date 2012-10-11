@@ -121,6 +121,7 @@ public class Recorder {
 //        		db.updateCallSettings(min, max, avg);
 //        	}
         	Log.i(TAG, "Min:" + min +  " Max:" + max + " Avg:" + avg);
+        	avg = 0.01;
         	float score = DataAnalysis.getScaledScore(data, min, max, avg);
         	Log.i(TAG, "Score:" +score);
         	callData.setRmsMedion(score);

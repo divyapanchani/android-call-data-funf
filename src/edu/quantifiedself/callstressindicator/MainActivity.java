@@ -43,6 +43,7 @@ import com.androidplot.xy.BarRenderer;
 import com.androidplot.xy.BoundaryMode;
 import com.androidplot.xy.SimpleXYSeries;
 import com.androidplot.xy.XYPlot;
+import com.androidplot.xy.XYStepMode;
 
 public class MainActivity extends FragmentActivity {
 
@@ -60,7 +61,6 @@ public class MainActivity extends FragmentActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.user_main);
 		context = this;
-
 		 Button showChart = (Button)findViewById(R.id.showChart);
 
 		// Initialize spinners
@@ -70,7 +70,7 @@ public class MainActivity extends FragmentActivity {
 		sampleRateAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		datePeriodSpinner.setAdapter(sampleRateAdapter);
 		datePeriodSpinner.setOnItemSelectedListener(new DatePeriodSelectedListener());
-		datePeriodSpinner.setSelection(1);
+		datePeriodSpinner.setSelection(0);
 
 		chartUnitSpinner = (Spinner) findViewById(R.id.chart_unit_spinner);
 		ArrayAdapter<CharSequence> audioSourceAdapter = ArrayAdapter.createFromResource(this, R.array.chart_units_array,
@@ -151,6 +151,7 @@ public class MainActivity extends FragmentActivity {
 		// Get data
 		List<Float> stressValues = new ArrayList<Float>(); // {5, 8, 9, 2, 5};
 		List<Long> unitValues = new ArrayList<Long>();
+		final List<String> unitValuesString = new ArrayList<String>();
 		// {
 		// 978307200, // 2001
 		// 1009843200, // 2002
@@ -163,6 +164,7 @@ public class MainActivity extends FragmentActivity {
 		// List<CallData> periodData = db.getAllCallData();
 		List<CallData> periodData = null;
 		periodData = db.getPerPeriodCallDataInPeriod(unit, FromDate, ToDate);
+//		periodData = db.getAllCallData();
 		if (periodData.size() == 0) {
 			return;
 		}
@@ -174,10 +176,12 @@ public class MainActivity extends FragmentActivity {
 			try {
 				if (unit.equals("Per call")) {
 					try {
-						Scanner in = new Scanner(tempCallData.getPhone()).useDelimiter("[^0-9]+");
-						unitValues.add(in.nextLong());
+						unitValuesString.add(tempCallData.getPhone());
+						unitValues.add(new Long(i));
+//						Scanner in = new Scanner(tempCallData.getPhone()).useDelimiter("[^0-9]+");
+//						unitValues.add(in.nextLong());
 					} catch (Exception e) {
-						unitValues.add(4915737119717L);
+//						unitValues.add(4915737119717L);
 					}
 				} else {
 					unitValues.add(new Long(dateFormat.parse(tempCallData.getTimestamp()).getTime()));
@@ -197,6 +201,7 @@ public class MainActivity extends FragmentActivity {
 
 		mySimpleXYPlot.addSeries(series2, BarRenderer.class, new BarFormatter(Color.argb(100, 0, 200, 0), Color.rgb(0, 80, 0)));
 		mySimpleXYPlot.setDomainStepValue(unitValues.size());
+		mySimpleXYPlot.setTicksPerDomainLabel(1);
 		mySimpleXYPlot.setRangeStepValue(10);
 		mySimpleXYPlot.setTicksPerRangeLabel(1);
 
@@ -207,7 +212,7 @@ public class MainActivity extends FragmentActivity {
 		// boundaries to those values. If we did not do this, the plot would
 		// auto-range which
 		// can be visually confusing in the case of dynamic plots.
-		mySimpleXYPlot.setRangeBoundaries(0, 10, BoundaryMode.FIXED);
+		mySimpleXYPlot.setRangeBoundaries(0, 30, BoundaryMode.FIXED);
 
 		// use our custom domain value formatter:
 		if (!unit.equals("Per call")) {
@@ -225,35 +230,11 @@ public class MainActivity extends FragmentActivity {
 				@Override
 				public StringBuffer format(Object object, StringBuffer buffer, FieldPosition field) {
 					// TODO Auto-generated method stub
-					return buffer.append(object.toString());
+					double objD = Double.parseDouble(object.toString()); 
+ 					return buffer.append(unitValuesString.get(safeLongToInt((long)objD)));
 				}
 			});
 		}
-//		mySimpleXYPlot.setDomainValueFormat(new Format() {
-//			// create a simple date format that draws on the year portion of our
-//			// timestamp.
-//			// see
-//			// http://download.oracle.com/javase/1.4.2/docs/api/java/text/SimpleDateFormat.html
-//			// for a full description of SimpleDateFormat.
-//			private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM");
-//
-//			@Override
-//			public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
-//
-//				// because our timestamps are in seconds and SimpleDateFormat
-//				// expects milliseconds
-//				// we multiply our timestamp by 1000:
-//				long timestamp = ((Number) obj).longValue() * 1000;
-//				Date date = new Date(timestamp);
-//				return dateFormat.format(date, toAppendTo, pos);
-//			}
-//
-//			@Override
-//			public Object parseObject(String source, ParsePosition pos) {
-//				return null;
-//
-//			}
-//		});
 
 		// update our domain and range axis labels:
 		mySimpleXYPlot.setDomainLabel(unit);
@@ -337,5 +318,11 @@ public class MainActivity extends FragmentActivity {
 		}
 
 	}
-
+	public static int safeLongToInt(long l) {
+	    if (l < Integer.MIN_VALUE || l > Integer.MAX_VALUE) {
+	        throw new IllegalArgumentException
+	            (l + " cannot be cast to int without changing its value.");
+	    }
+	    return (int) l;
+	}
 }
