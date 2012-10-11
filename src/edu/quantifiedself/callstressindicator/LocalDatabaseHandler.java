@@ -194,15 +194,20 @@ public class LocalDatabaseHandler extends SQLiteOpenHelper{
 //        + RMS + " REAL,"
 //        + ACCEL + " REAL"
         
-		String selectClause = "Select 0, ''," + TIMESTAMP+" ,0,AVG("+ RMS +"),0 ";
-		String periodSymbol = "d";
-		// if (period == "Per day") {
-		// periodSymbol = "d";
-		// } else 
-		if (period.equals("Per month")) {
-			periodSymbol = "m";			
+		String selectClause = "";
+		String groupByclause = "";
+		if (period.equals("Per call")) {
+			selectClause = "Select 0,  " + PHONE + ",'' ,0,AVG("+ RMS +"),0 ";
+			groupByclause = "group by "+ PHONE;			
 		}
-		String groupByclause = "group by strftime('%" + periodSymbol + "'," + TIMESTAMP + ") " + " order by " + TIMESTAMP + " ASC";
+		else{
+			String periodSymbol = "d";
+			if (period.equals("Per month")) {
+				periodSymbol = "m";			
+			}
+			selectClause = "Select 0, ''," + TIMESTAMP+" ,0,AVG("+ RMS +"),0 ";
+			groupByclause = "group by strftime('%" + periodSymbol + "'," + TIMESTAMP + ") " + " order by " + TIMESTAMP + " ASC";
+		}
 	    return getCallData(selectClause, getWherePeriodClause(from,to), groupByclause);
   }
 	// Getting CallDatas in time period defined by start end (dates in unix epoch)

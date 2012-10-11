@@ -1,11 +1,17 @@
 package edu.quantifiedself.callstressindicator;
 
+import java.text.FieldPosition;
+import java.text.Format;
 import java.text.ParseException;
+import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import android.annotation.TargetApi;
 import android.app.DatePickerDialog;
@@ -144,7 +150,7 @@ public class MainActivity extends FragmentActivity {
 		mySimpleXYPlot.clear();
 		// Get data
 		List<Float> stressValues = new ArrayList<Float>(); // {5, 8, 9, 2, 5};
-		List<Long> timeValues = new ArrayList<Long>();
+		List<Long> unitValues = new ArrayList<Long>();
 		// {
 		// 978307200, // 2001
 		// 1009843200, // 2002
@@ -160,12 +166,22 @@ public class MainActivity extends FragmentActivity {
 		if (periodData.size() == 0) {
 			return;
 		}
+		Pattern p = Pattern.compile("^[a-zA-Z]+([0-9]+).*");
 		for (int i = 0; i < periodData.size(); i++) {
 			CallData tempCallData = periodData.get(i);
 			dataToPrint += tempCallData.ToString();
 			stressValues.add(new Float(tempCallData.getRmsMedion()));
 			try {
-				timeValues.add(new Long(dateFormat.parse(tempCallData.getTimestamp()).getTime()));
+				if (unit.equals("Per call")) {
+					try {
+						Scanner in = new Scanner(tempCallData.getPhone()).useDelimiter("[^0-9]+");
+						unitValues.add(in.nextLong());
+					} catch (Exception e) {
+						unitValues.add(4915737119717L);
+					}
+				} else {
+					unitValues.add(new Long(dateFormat.parse(tempCallData.getTimestamp()).getTime()));
+				}
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -176,10 +192,11 @@ public class MainActivity extends FragmentActivity {
 		db.close();
 
 		// create our series from our array of nums:
-		XYSeries series2 = new SimpleXYSeries(timeValues, stressValues, unit);
+		XYSeries series2;
+		series2 = new SimpleXYSeries(unitValues, stressValues, "Stress Indicator");
 
 		mySimpleXYPlot.addSeries(series2, BarRenderer.class, new BarFormatter(Color.argb(100, 0, 200, 0), Color.rgb(0, 80, 0)));
-		mySimpleXYPlot.setDomainStepValue(timeValues.size());
+		mySimpleXYPlot.setDomainStepValue(unitValues.size());
 		mySimpleXYPlot.setRangeStepValue(10);
 		mySimpleXYPlot.setTicksPerRangeLabel(1);
 
@@ -193,7 +210,25 @@ public class MainActivity extends FragmentActivity {
 		mySimpleXYPlot.setRangeBoundaries(0, 10, BoundaryMode.FIXED);
 
 		// use our custom domain value formatter:
-		mySimpleXYPlot.setDomainValueFormat(new SimpleDateFormat("dd/MM/yy"));
+		if (!unit.equals("Per call")) {
+			mySimpleXYPlot.setDomainValueFormat(new SimpleDateFormat("dd/MM/yy"));
+		}
+		else{
+			mySimpleXYPlot.setDomainValueFormat(new Format() {
+				
+				@Override
+				public Object parseObject(String string, ParsePosition position) {
+					// TODO Auto-generated method stub
+					return null;
+				}
+				
+				@Override
+				public StringBuffer format(Object object, StringBuffer buffer, FieldPosition field) {
+					// TODO Auto-generated method stub
+					return buffer.append(object.toString());
+				}
+			});
+		}
 //		mySimpleXYPlot.setDomainValueFormat(new Format() {
 //			// create a simple date format that draws on the year portion of our
 //			// timestamp.
@@ -221,9 +256,9 @@ public class MainActivity extends FragmentActivity {
 //		});
 
 		// update our domain and range axis labels:
-		mySimpleXYPlot.setDomainLabel("Axis");
+		mySimpleXYPlot.setDomainLabel(unit);
 		mySimpleXYPlot.getDomainLabelWidget().pack();
-		mySimpleXYPlot.setRangeLabel("Angle (Degs)");
+		mySimpleXYPlot.setRangeLabel("Stress");
 		mySimpleXYPlot.getRangeLabelWidget().pack();
 
 		mySimpleXYPlot.setGridPadding(15, 0, 15, 0);
