@@ -27,7 +27,8 @@
 	<string-array name="date_periods_array">
 		<item>Last week</item>
 		<item>Last month</item>
-		<item>custom</item>
+		<item>Set from date</item>
+		<item>Set to date</item>
 	</string-array>
     <string name="chart_unit_prompt">Select unit</string>
 	<string-array name="chart_units_array">
@@ -38,4 +39,25 @@
     <string name="generate_chart_prompt">Update</string>
     <string name="chart_title">Stress overview</string>
     	
+	<string name="start_recording">Start Recording</string>
+	<string name="stop_recording">Stop Recording</string>
+
+	<string name="sample_rates_prompt">Sample Rate</string>
+	<string-array name="sample_rates_array">
+		<item>44100</item>
+		<item>22050</item>
+		<item>16000</item>
+		<item>11025</item>
+		<item>8000</item>
+		<item>4000</item>
+	</string-array>
+	
+	<string name="audio_source_prompt">Audio Source</string>
+	<string-array name="audio_source_array">
+		<item>MIC</item>
+		<item>VOICE_CALL</item>
+		<item>VOICE_DOWNLINK</item>
+		<item>VOICE_RECOGNITION</item>
+		<item>VOICE_UPLINK</item>
+	</string-array>
 </resources>
